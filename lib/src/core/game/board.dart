@@ -1,3 +1,4 @@
+import 'package:messmath/src/core/game/cell_type.dart';
 import 'package:messmath/src/core/game/direction.dart';
 
 enum MoveResult { moved, pushed, blocked }
@@ -336,26 +337,6 @@ class Board {
     }
     return buffer.toString().trim();
   }
-}
-
-enum CellType {
-  empty,
-  player,
-  zero,
-  one,
-  two,
-  three,
-  four,
-  five,
-  six,
-  seven,
-  eight,
-  nine,
-  plus,
-  minus,
-  multiply,
-  divide,
-  equal,
 }
 
 class Cell {

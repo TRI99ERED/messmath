@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:messmath/src/core/game/board.dart';
+import 'package:messmath/src/core/game/cell_type.dart';
 
 void main() {
   group('Board from ASCII tests', () {
