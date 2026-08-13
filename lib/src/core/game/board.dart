@@ -1,5 +1,5 @@
-import 'package:messmath/src/core/game/cell_type.dart';
-import 'package:messmath/src/core/game/direction.dart';
+import 'cell_type.dart';
+import 'direction.dart';
 
 enum MoveResult { moved, pushed, blocked }
 
