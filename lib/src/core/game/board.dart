@@ -1,5 +1,7 @@
 import 'package:messmath/src/core/game/direction.dart';
 
+enum MoveResult { moved, pushed, blocked }
+
 class Board {
   final int width;
   final int height;
@@ -30,7 +32,7 @@ class Board {
     cells[y][x] = Cell(x, y, type: type, isWall: isWall);
   }
 
-  void movePlayerPushing(Direction direction) {
+  MoveResult movePlayerPushing(Direction direction) {
     final player = playerCell;
     int newX = player.x;
     int newY = player.y;
@@ -51,37 +53,42 @@ class Board {
     }
 
     if (newX < 0 || newX >= width || newY < 0 || newY >= height) {
-      throw RangeError('Move out of bounds: ($newX, $newY)');
+      return MoveResult.blocked;
     }
 
     final targetCell = getCell(newX, newY);
     if (targetCell.isWall) {
-      throw StateError('Cannot move to a wall cell: ($newX, $newY)');
+      return MoveResult.blocked;
     }
+
+    var moveResult = MoveResult.moved;
 
     if (direction == Direction.up || direction == Direction.down) {
       int step = direction == Direction.up ? -1 : 1;
       for (int y = newY; y >= 0 && y < height; y += step) {
         final currentCell = getCell(newX, y);
-        if (currentCell.isWall) break;
+        if (currentCell.isWall) return MoveResult.blocked;
         if (y == newY) {
           setCell(newX, y, CellType.player);
         } else {
           setCell(newX, y, getCell(newX, y - step).type);
+          moveResult = MoveResult.pushed;
         }
       }
     } else {
       int step = direction == Direction.left ? -1 : 1;
       for (int x = newX; x >= 0 && x < width; x += step) {
         final currentCell = getCell(x, newY);
-        if (currentCell.isWall) break;
+        if (currentCell.isWall) return MoveResult.blocked;
         if (x == newX) {
           setCell(x, newY, CellType.player);
         } else {
           setCell(x, newY, getCell(x - step, newY).type);
+          moveResult = MoveResult.pushed;
         }
       }
     }
+    return moveResult;
   }
 }
 
