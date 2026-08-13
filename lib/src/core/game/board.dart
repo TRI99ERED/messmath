@@ -18,6 +18,119 @@ class Board {
     : width = cells.isNotEmpty ? cells[0].length : 0,
       height = cells.length;
 
+  factory Board.fromAsciiString(String ascii) {
+    ascii = ascii.trim();
+    ascii = ascii.replaceAll(' ', '');
+
+    if (ascii.isEmpty) {
+      throw FormatException('ASCII board representation cannot be empty');
+    }
+
+    final lines = ascii.trim().split('\n');
+    final height = lines.length;
+    final width = lines.isNotEmpty ? lines[0].length : 0;
+
+    final cells = <List<Cell>>[];
+
+    for (int y = 0; y < height; y++) {
+      final row = <Cell>[];
+
+      var isWall = false;
+
+      for (int x = 0; x < lines[y].length; x++) {
+        final cell = lines[y][x];
+        switch (cell) {
+          case '.':
+            row.add(Cell(x, y, type: CellType.empty));
+            break;
+          case '#':
+            row.add(Cell(x, y, type: CellType.empty, isWall: true));
+            break;
+          case 'P':
+            row.add(Cell(x, y, type: CellType.player));
+            break;
+          case '0':
+            row.add(Cell(x, y, type: CellType.zero, isWall: isWall));
+            break;
+          case '1':
+            row.add(Cell(x, y, type: CellType.one, isWall: isWall));
+            break;
+          case '2':
+            row.add(Cell(x, y, type: CellType.two, isWall: isWall));
+            break;
+          case '3':
+            row.add(Cell(x, y, type: CellType.three, isWall: isWall));
+            break;
+          case '4':
+            row.add(Cell(x, y, type: CellType.four, isWall: isWall));
+            break;
+          case '5':
+            row.add(Cell(x, y, type: CellType.five, isWall: isWall));
+            break;
+          case '6':
+            row.add(Cell(x, y, type: CellType.six, isWall: isWall));
+            break;
+          case '7':
+            row.add(Cell(x, y, type: CellType.seven, isWall: isWall));
+            break;
+          case '8':
+            row.add(Cell(x, y, type: CellType.eight, isWall: isWall));
+            break;
+          case '9':
+            row.add(Cell(x, y, type: CellType.nine, isWall: isWall));
+            break;
+          case '+':
+            row.add(Cell(x, y, type: CellType.plus, isWall: isWall));
+            break;
+          case '-':
+            row.add(Cell(x, y, type: CellType.minus, isWall: isWall));
+            break;
+          case '*':
+            row.add(Cell(x, y, type: CellType.multiply, isWall: isWall));
+            break;
+          case '/':
+            row.add(Cell(x, y, type: CellType.divide, isWall: isWall));
+            break;
+          case '=':
+            row.add(Cell(x, y, type: CellType.equal, isWall: isWall));
+            break;
+          case '[':
+            isWall = true;
+            continue;
+          case ']':
+            isWall = false;
+            continue;
+          default:
+            throw FormatException(
+              'Invalid character in ASCII board representation',
+            );
+        }
+      }
+      cells.add(row);
+    }
+
+    if (cells.length != height) {
+      throw FormatException('There should be exactly $height rows');
+    }
+    for (var row in cells) {
+      if (row.length != width) {
+        throw FormatException(
+          'All rows must have the same length (expected $width, got ${row.length})',
+        );
+      }
+    }
+
+    if (cells
+            .expand((row) => row)
+            .where((cell) => cell.type == CellType.player)
+            .length !=
+        1) {
+      throw FormatException('There must be exactly one player cell');
+    }
+
+    return Board(cells);
+  }
+
   Cell getCell(int x, int y) {
     if (x < 0 || x >= width || y < 0 || y >= height) {
       throw RangeError('Cell coordinates out of bounds: ($x, $y)');
