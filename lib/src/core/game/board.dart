@@ -149,59 +149,192 @@ class Board {
     final player = playerCell;
     int newX = player.x;
     int newY = player.y;
+    int step;
+    bool vertical;
 
     switch (direction) {
       case Direction.up:
         newY--;
+        step = -1;
+        vertical = true;
         break;
       case Direction.down:
         newY++;
+        step = 1;
+        vertical = true;
         break;
       case Direction.left:
         newX--;
+        step = -1;
+        vertical = false;
         break;
       case Direction.right:
         newX++;
+        step = 1;
+        vertical = false;
         break;
     }
 
     if (newX < 0 || newX >= width || newY < 0 || newY >= height) {
       return MoveResult.blocked;
     }
-
-    final targetCell = getCell(newX, newY);
-    if (targetCell.isWall) {
+    if (getCell(newX, newY).isWall) {
       return MoveResult.blocked;
     }
 
-    var moveResult = MoveResult.moved;
-
-    if (direction == Direction.up || direction == Direction.down) {
-      int step = direction == Direction.up ? -1 : 1;
-      for (int y = newY; y >= 0 && y < height; y += step) {
-        final currentCell = getCell(newX, y);
-        if (currentCell.isWall) return MoveResult.blocked;
-        if (y == newY) {
-          setCell(newX, y, CellType.player);
-        } else {
-          setCell(newX, y, getCell(newX, y - step).type);
-          moveResult = MoveResult.pushed;
-        }
-      }
-    } else {
-      int step = direction == Direction.left ? -1 : 1;
-      for (int x = newX; x >= 0 && x < width; x += step) {
-        final currentCell = getCell(x, newY);
-        if (currentCell.isWall) return MoveResult.blocked;
-        if (x == newX) {
-          setCell(x, newY, CellType.player);
-        } else {
-          setCell(x, newY, getCell(x - step, newY).type);
-          moveResult = MoveResult.pushed;
-        }
+    int gap = -1;
+    for (int i = 0; i < width + height; i++) {
+      final x = vertical ? newX : newX + i * step;
+      final y = vertical ? newY + i * step : newY;
+      if (x < 0 || x >= width || y < 0 || y >= height) break;
+      final c = getCell(x, y);
+      if (c.isWall) break;
+      if (c.isEmpty) {
+        gap = i;
+        break;
       }
     }
-    return moveResult;
+    if (gap == -1) return MoveResult.blocked;
+
+    for (int i = gap; i > 0; i--) {
+      final toX = vertical ? newX : newX + i * step;
+      final toY = vertical ? newY + i * step : newY;
+      final fromX = vertical ? newX : newX + (i - 1) * step;
+      final fromY = vertical ? newY + (i - 1) * step : newY;
+      setCell(toX, toY, getCell(fromX, fromY).type);
+    }
+
+    setCell(newX, newY, CellType.player);
+    setCell(player.x, player.y, CellType.empty);
+
+    return gap == 0 ? MoveResult.moved : MoveResult.pushed;
+  }
+
+  String toAsciiString() {
+    final buffer = StringBuffer();
+    for (var row in cells) {
+      for (var cell in row) {
+        if (cell.isWall && cell.type == CellType.empty) {
+          buffer.write('#');
+        } else {
+          switch (cell.type) {
+            case CellType.empty:
+              buffer.write('.');
+              break;
+            case CellType.player:
+              buffer.write('P');
+              break;
+            case CellType.zero:
+              if (cell.isWall) {
+                buffer.write('[0]');
+              } else {
+                buffer.write('0');
+              }
+              break;
+            case CellType.one:
+              if (cell.isWall) {
+                buffer.write('[1]');
+              } else {
+                buffer.write('1');
+              }
+              break;
+            case CellType.two:
+              if (cell.isWall) {
+                buffer.write('[2]');
+              } else {
+                buffer.write('2');
+              }
+              break;
+            case CellType.three:
+              if (cell.isWall) {
+                buffer.write('[3]');
+              } else {
+                buffer.write('3');
+              }
+              break;
+            case CellType.four:
+              if (cell.isWall) {
+                buffer.write('[4]');
+              } else {
+                buffer.write('4');
+              }
+              break;
+            case CellType.five:
+              if (cell.isWall) {
+                buffer.write('[5]');
+              } else {
+                buffer.write('5');
+              }
+              break;
+            case CellType.six:
+              if (cell.isWall) {
+                buffer.write('[6]');
+              } else {
+                buffer.write('6');
+              }
+              break;
+            case CellType.seven:
+              if (cell.isWall) {
+                buffer.write('[7]');
+              } else {
+                buffer.write('7');
+              }
+              break;
+            case CellType.eight:
+              if (cell.isWall) {
+                buffer.write('[8]');
+              } else {
+                buffer.write('8');
+              }
+              break;
+            case CellType.nine:
+              if (cell.isWall) {
+                buffer.write('[9]');
+              } else {
+                buffer.write('9');
+              }
+              break;
+            case CellType.plus:
+              if (cell.isWall) {
+                buffer.write('[+]');
+              } else {
+                buffer.write('+');
+              }
+              break;
+            case CellType.minus:
+              if (cell.isWall) {
+                buffer.write('[-]');
+              } else {
+                buffer.write('-');
+              }
+              break;
+            case CellType.multiply:
+              if (cell.isWall) {
+                buffer.write('[*]');
+              } else {
+                buffer.write('*');
+              }
+              break;
+            case CellType.divide:
+              if (cell.isWall) {
+                buffer.write('[/]');
+              } else {
+                buffer.write('/');
+              }
+              break;
+            case CellType.equal:
+              if (cell.isWall) {
+                buffer.write('[=]');
+              } else {
+                buffer.write('=');
+              }
+              break;
+          }
+        }
+      }
+      buffer.writeln();
+    }
+    return buffer.toString().trim();
   }
 }
 

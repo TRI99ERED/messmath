@@ -104,10 +104,25 @@ void main() {
       expect(board.height, equals(4));
       expect(board.cells[0][0].isWall, equals(true));
       expect(board.cells[1][1].type, equals(CellType.empty));
+      expect(board.cells[1][1].isWall, equals(false));
       expect(board.cells[2][1].type, equals(CellType.five));
       expect(board.cells[2][1].isWall, equals(true));
       expect(board.cells[1][2].type, equals(CellType.one));
       expect(board.cells[1][2].isWall, equals(false));
+    });
+  });
+
+  group('Board to Ascii tests', () {
+    test('Convert board to ASCII string', () {
+      final ascii = '''
+###########
+#.1.+.[2]...#
+#[5]P.......#
+###########
+      ''';
+      final board = Board.fromAsciiString(ascii);
+      final convertedAscii = board.toAsciiString();
+      expect(convertedAscii, equals(ascii.trim()));
     });
   });
 }
