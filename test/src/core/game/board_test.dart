@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:messmath/src/core/game/board.dart';
 import 'package:messmath/src/core/game/cell_type.dart';
+import 'package:messmath/src/core/game/direction.dart';
 
 void main() {
   group('Board from ASCII tests', () {
@@ -124,6 +125,68 @@ void main() {
       final board = Board.fromAsciiString(ascii);
       final convertedAscii = board.toAsciiString();
       expect(convertedAscii, equals(ascii.trim()));
+    });
+  });
+
+  group('Board movement tests', () {
+    test('walk into an empty cell moves the player', () {
+      final board = Board.fromAsciiString('...\n.P.\n...');
+      expect(board.movePlayerPushing(Direction.right), MoveResult.moved);
+      expect(board.toAsciiString(), '...\n..P\n...');
+    });
+
+    test('push a single token into a gap', () {
+      final board = Board.fromAsciiString('.5P');
+      expect(board.movePlayerPushing(Direction.left), MoveResult.pushed);
+      expect(board.toAsciiString(), '5P.');
+    });
+
+    test('push a chain of tokens into a gap', () {
+      final board = Board.fromAsciiString('.12P');
+      expect(board.movePlayerPushing(Direction.left), MoveResult.pushed);
+      expect(board.toAsciiString(), '12P.');
+    });
+
+    test('push right shifts the chain', () {
+      final board = Board.fromAsciiString('P15.');
+      expect(board.movePlayerPushing(Direction.right), MoveResult.pushed);
+      expect(board.toAsciiString(), '.P15');
+    });
+
+    test('push down shifts the chain', () {
+      final board = Board.fromAsciiString('.\nP\n5\n.');
+      expect(board.movePlayerPushing(Direction.down), MoveResult.pushed);
+      expect(board.toAsciiString(), '.\n.\nP\n5');
+    });
+
+    test('push up shifts the chain', () {
+      final board = Board.fromAsciiString('.\n1\n2\nP');
+      expect(board.movePlayerPushing(Direction.up), MoveResult.pushed);
+      expect(board.toAsciiString(), '1\n2\nP\n.');
+    });
+
+    test('push into a static token-wall is blocked', () {
+      final board = Board.fromAsciiString('[5]P');
+      expect(board.movePlayerPushing(Direction.left), MoveResult.blocked);
+      expect(board.toAsciiString(), '[5]P');
+    });
+
+    test('walk into a static token-wall is blocked', () {
+      final board = Board.fromAsciiString('P[5]');
+      expect(board.movePlayerPushing(Direction.right), MoveResult.blocked);
+      expect(board.toAsciiString(), 'P[5]');
+    });
+
+    test('push a chain against a plain wall is blocked', () {
+      final board = Board.fromAsciiString('#12P');
+      expect(board.movePlayerPushing(Direction.left), MoveResult.blocked);
+      expect(board.toAsciiString(), '#12P');
+    });
+
+    test('push off the board edge is blocked', () {
+      final board = Board.fromAsciiString('P.');
+      expect(board.movePlayerPushing(Direction.left), MoveResult.blocked);
+      expect(board.toAsciiString(), 'P.');
     });
   });
 }
