@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:messmath/src/core/game/engine.dart';
 import 'package:messmath/src/features/gameplay/components/board_component.dart';
+import 'package:messmath/src/features/gameplay/components/game_complete_overlay_component.dart';
+import 'package:messmath/src/features/gameplay/components/win_overlay_component.dart';
 import 'package:messmath/src/features/themes/palette.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -101,6 +103,9 @@ class MessmathGame extends FlameGame with KeyboardEvents {
       } else if (keysPressed.contains(LogicalKeyboardKey.keyR)) {
         (world as MessmathWorld).boardComponent.reset();
         return KeyEventResult.handled;
+      } else if (keysPressed.contains(LogicalKeyboardKey.enter)) {
+        (world as MessmathWorld).nextLevel();
+        return KeyEventResult.handled;
       }
     }
     return KeyEventResult.ignored;
@@ -108,6 +113,8 @@ class MessmathGame extends FlameGame with KeyboardEvents {
 }
 
 class MessmathWorld extends World {
+  int currentLevel = 1;
+
   late BoardComponent boardComponent;
   late HudComponent hudComponent;
 
@@ -115,14 +122,31 @@ class MessmathWorld extends World {
   void onLoad() {
     super.onLoad();
 
-    final level = LevelLoader.loadLevel(1);
+    loadLevel(currentLevel);
+  }
+
+  void loadLevel(int levelNumber) {
+    currentLevel = levelNumber;
+    final level = LevelLoader.loadLevel(levelNumber);
 
     boardComponent = BoardComponent(Engine(level.initialBoard));
-
-    add(boardComponent);
-
     hudComponent = HudComponent(levelName: level.name);
 
+    removeAll(children);
+    add(boardComponent);
     add(hudComponent);
+
+    boardComponent.onWin = () {
+      add(WinOverlayComponent(moveCount: boardComponent.moveCount));
+    };
+  }
+
+  void nextLevel() {
+    if (currentLevel < LevelLoader.levels.length) {
+      loadLevel(currentLevel + 1);
+    } else {
+      removeAll(children);
+      add(GameCompleteOverlayComponent());
+    }
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'board.dart';
 import 'direction.dart';
 import 'win_checker.dart';
@@ -10,7 +12,7 @@ class Engine {
   bool _won = false;
 
   /// Called once when a move completes the level.
-  void Function()? onWin;
+  VoidCallback? onWin;
 
   Board get board => _board;
   int get moveCount => _moveCount;

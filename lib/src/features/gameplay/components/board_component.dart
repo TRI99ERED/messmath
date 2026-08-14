@@ -23,6 +23,10 @@ class BoardComponent extends Component with HasGameReference<MessmathGame> {
   BoardComponent(Engine engine) : _engine = engine;
 
   int get moveCount => _engine.moveCount;
+  VoidCallback? get onWin => _engine.onWin;
+  set onWin(VoidCallback? callback) {
+    _engine.onWin = callback;
+  }
 
   @override
   void update(double dt) {

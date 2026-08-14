@@ -1,13 +1,15 @@
 import 'package:messmath/src/core/levels/levels.dart';
 
 class LevelLoader {
+  static final List<Level> levels = [
+    level1,
+    // Add more levels here
+  ];
+
   static Level loadLevel(int levelIndex) {
-    switch (levelIndex) {
-      case 1:
-        return level1;
-      // Add more cases for other levels
-      default:
-        throw ArgumentError('Level not found');
+    if (levelIndex >= 1 && levelIndex <= levels.length) {
+      return levels[levelIndex - 1];
     }
+    throw ArgumentError('Level not found');
   }
 }

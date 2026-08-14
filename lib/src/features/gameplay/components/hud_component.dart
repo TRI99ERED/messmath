@@ -48,9 +48,9 @@ class HudComponent extends Component {
 
     final moveCountPanelRRect = RRect.fromRectAndCorners(
       Rect.fromLTWH(
-        MessmathGame.kGameWidth / 2 - 16 - 256,
+        MessmathGame.kGameWidth / 2 - 16 - 512,
         -MessmathGame.kGameHeight / 2 + 16,
-        256,
+        512,
         64,
       ),
       topLeft: const Radius.circular(8),
@@ -79,8 +79,8 @@ class HudComponent extends Component {
       Offset(
         MessmathGame.kGameWidth / 2 -
             16 -
-            256 +
-            (256 - moveCountTextPainter.width) / 2,
+            512 +
+            (512 - moveCountTextPainter.width) / 2,
         -MessmathGame.kGameHeight / 2 +
             16 +
             (64 - moveCountTextPainter.height) / 2,
