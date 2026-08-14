@@ -97,6 +97,9 @@ class MessmathGame extends FlameGame with KeyboardEvents {
           keysPressed.contains(LogicalKeyboardKey.keyD)) {
         directionQueue.add(Direction.right);
         return KeyEventResult.handled;
+      } else if (keysPressed.contains(LogicalKeyboardKey.keyR)) {
+        (world as MessmathWorld).boardComponent.reset();
+        return KeyEventResult.handled;
       }
     }
     return KeyEventResult.ignored;
@@ -104,13 +107,15 @@ class MessmathGame extends FlameGame with KeyboardEvents {
 }
 
 class MessmathWorld extends World {
+  late BoardComponent boardComponent;
+
   @override
   void onLoad() {
     super.onLoad();
-    add(
-      BoardComponent(
-        Engine(
-          Board.fromAsciiString('''
+
+    boardComponent = BoardComponent(
+      Engine(
+        Board.fromAsciiString('''
           #############
           #...........#
           #.12......[3].#
@@ -119,8 +124,9 @@ class MessmathWorld extends World {
           #...........#
           #############
           '''),
-        ),
       ),
     );
+
+    add(boardComponent);
   }
 }
