@@ -10,6 +10,8 @@ import 'package:messmath/src/core/game/engine.dart';
 import 'package:messmath/src/features/gameplay/components/board_component.dart';
 import 'package:messmath/src/features/gameplay/components/game_complete_overlay_component.dart';
 import 'package:messmath/src/features/gameplay/components/win_overlay_component.dart';
+import 'package:messmath/src/features/gameplay/scenes/level_select_scene.dart';
+import 'package:messmath/src/features/gameplay/scenes/title_scene.dart';
 import 'package:messmath/src/features/themes/palette.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -84,6 +86,38 @@ class MessmathGame extends FlameGame with KeyboardEvents {
     super.onKeyEvent(event, keysPressed);
 
     if (event is KeyDownEvent) {
+      final world = this.world as MessmathWorld;
+      final levelSelectScene = world.levelSelectScene;
+      if (levelSelectScene != null) {
+        if (keysPressed.contains(LogicalKeyboardKey.arrowUp) ||
+            keysPressed.contains(LogicalKeyboardKey.keyW)) {
+          levelSelectScene.navigate(Direction.up);
+          return KeyEventResult.handled;
+        } else if (keysPressed.contains(LogicalKeyboardKey.arrowDown) ||
+            keysPressed.contains(LogicalKeyboardKey.keyS)) {
+          levelSelectScene.navigate(Direction.down);
+          return KeyEventResult.handled;
+        } else if (keysPressed.contains(LogicalKeyboardKey.arrowLeft) ||
+            keysPressed.contains(LogicalKeyboardKey.keyA)) {
+          levelSelectScene.navigate(Direction.left);
+          return KeyEventResult.handled;
+        } else if (keysPressed.contains(LogicalKeyboardKey.arrowRight) ||
+            keysPressed.contains(LogicalKeyboardKey.keyD)) {
+          levelSelectScene.navigate(Direction.right);
+          return KeyEventResult.handled;
+        } else if (keysPressed.contains(LogicalKeyboardKey.enter)) {
+          levelSelectScene.selectLevel();
+          return KeyEventResult.handled;
+        }
+        return KeyEventResult.ignored;
+      }
+      if (world.isOnTitleScreen) {
+        if (keysPressed.contains(LogicalKeyboardKey.enter)) {
+          world.showLevelSelect();
+          return KeyEventResult.handled;
+        }
+        return KeyEventResult.ignored;
+      }
       if (keysPressed.contains(LogicalKeyboardKey.arrowUp) ||
           keysPressed.contains(LogicalKeyboardKey.keyW)) {
         directionQueue.add(Direction.up);
@@ -101,10 +135,10 @@ class MessmathGame extends FlameGame with KeyboardEvents {
         directionQueue.add(Direction.right);
         return KeyEventResult.handled;
       } else if (keysPressed.contains(LogicalKeyboardKey.keyR)) {
-        (world as MessmathWorld).resetLevel();
+        world.resetLevel();
         return KeyEventResult.handled;
       } else if (keysPressed.contains(LogicalKeyboardKey.enter)) {
-        (world as MessmathWorld).nextLevel();
+        world.nextLevel();
         return KeyEventResult.handled;
       }
     }
@@ -122,7 +156,22 @@ class MessmathWorld extends World {
   void onLoad() {
     super.onLoad();
 
-    loadLevel(currentLevel);
+    add(TitleScene());
+  }
+
+  bool get isOnTitleScreen =>
+      children.any((component) => component is TitleScene);
+
+  LevelSelectScene? get levelSelectScene {
+    for (final component in children) {
+      if (component is LevelSelectScene) return component;
+    }
+    return null;
+  }
+
+  void showLevelSelect() {
+    removeAll(children);
+    add(LevelSelectScene());
   }
 
   void loadLevel(int levelNumber) {
