@@ -17,6 +17,8 @@ class BoardComponent extends Component with HasGameReference<MessmathGame> {
   static const double cellSize = 64.0;
   static const double spacing = 1.0;
   static const double moveDuration = 0.12;
+  static const double wiggleDuration = 0.12;
+  static const double wiggleAmplitude = 0.12;
   static const double fontSize = 32.0;
   static const double fineOffset = -2.0;
 
@@ -39,7 +41,10 @@ class BoardComponent extends Component with HasGameReference<MessmathGame> {
     }
     _animations.removeWhere((animation) {
       animation.elapsed += dt;
-      return animation.elapsed >= moveDuration;
+      final duration = animation.wiggle
+          ? moveDuration + wiggleDuration
+          : moveDuration;
+      return animation.elapsed >= duration;
     });
   }
 
@@ -47,7 +52,13 @@ class BoardComponent extends Component with HasGameReference<MessmathGame> {
     final before = Engine.cloneBoard(_engine.board);
     final result = _engine.move(direction);
     if (result == MoveResult.blocked) return;
-    _animations.addAll(_diff(before, _engine.board));
+    final animations = _diff(before, _engine.board);
+    if (result == MoveResult.pushed) {
+      for (final animation in animations) {
+        animation.wiggle = true;
+      }
+    }
+    _animations.addAll(animations);
     if (result == MoveResult.moved) {
       SoundEffects.instance.playMove();
     } else {
@@ -201,12 +212,21 @@ class _TileAnimation {
   final Vector2 from;
   final Vector2 to;
   double elapsed = 0;
+  bool wiggle = false;
 
   _TileAnimation(this.type, this.from, this.to);
 
   Vector2 get position {
-    final t = (elapsed / BoardComponent.moveDuration).clamp(0.0, 1.0);
-    final eased = 1 - (1 - t) * (1 - t); // ease-out quadratic
-    return from + (to - from) * eased;
+    final travel = (elapsed / BoardComponent.moveDuration).clamp(0.0, 1.0);
+    final eased = 1 - (1 - travel) * (1 - travel); // ease-out quadratic
+    final moved = from + (to - from) * eased;
+    if (!wiggle) return moved;
+    final settle = elapsed - BoardComponent.moveDuration;
+    if (settle <= 0) return moved;
+    final s = (settle / BoardComponent.wiggleDuration).clamp(0.0, 1.0);
+    final direction = (to - from).normalized();
+    final recoil =
+        math.sin(s * math.pi * 2) * (1 - s) * BoardComponent.wiggleAmplitude;
+    return to + direction * recoil;
   }
 }

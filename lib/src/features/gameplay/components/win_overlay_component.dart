@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:messmath/main.dart';
@@ -9,6 +11,25 @@ class WinOverlayComponent extends Component {
 
   WinOverlayComponent({required this.moveCount});
 
+  static const double _cycleDuration = 1.0;
+
+  late int _colorIndex;
+  double _elapsed = 0;
+
+  @override
+  void onLoad() {
+    _colorIndex = Random().nextInt(Palette.levelBackgrounds.length);
+  }
+
+  @override
+  void update(double dt) {
+    _elapsed += dt;
+    if (_elapsed >= _cycleDuration) {
+      _elapsed = 0;
+      _colorIndex = (_colorIndex + 1) % Palette.levelBackgrounds.length;
+    }
+  }
+
   @override
   void render(Canvas canvas) {
     final overlayRect = Rect.fromLTWH(
@@ -17,7 +38,8 @@ class WinOverlayComponent extends Component {
       MessmathGame.kGameWidth,
       MessmathGame.kGameHeight,
     );
-    final overlayPaint = Palette.color25.paint();
+    final overlayPaint = Paint()
+      ..color = Palette.levelBackgrounds[_colorIndex].color;
     canvas.drawRect(overlayRect, overlayPaint);
 
     final messagePainter = TextPainter(
