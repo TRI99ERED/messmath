@@ -1,13 +1,18 @@
 import 'dart:async';
 
 import 'package:flame/components.dart';
+import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:messmath/src/core/game/board.dart';
+import 'package:messmath/src/core/game/engine.dart';
+import 'package:messmath/src/features/gameplay/components/board_component.dart';
 import 'package:messmath/src/features/themes/palette.dart';
 import 'package:window_manager/window_manager.dart';
 
+import 'src/core/game/direction.dart';
 import 'src/core/utils/logger.dart';
 
 void main() {
@@ -46,9 +51,14 @@ void main() {
   );
 }
 
-class MessmathGame extends FlameGame {
+class MessmathGame extends FlameGame with KeyboardEvents {
   static const double kGameWidth = 1280;
   static const double kGameHeight = 720;
+
+  final List<Direction> directionQueue = [];
+
+  @override
+  Color backgroundColor() => Palette.color27.color;
 
   MessmathGame()
     : super(
@@ -64,7 +74,53 @@ class MessmathGame extends FlameGame {
       );
 
   @override
-  Color backgroundColor() => Palette.color27.color;
+  KeyEventResult onKeyEvent(
+    KeyEvent event,
+    Set<LogicalKeyboardKey> keysPressed,
+  ) {
+    super.onKeyEvent(event, keysPressed);
+
+    if (event is KeyDownEvent) {
+      if (keysPressed.contains(LogicalKeyboardKey.arrowUp) ||
+          keysPressed.contains(LogicalKeyboardKey.keyW)) {
+        directionQueue.add(Direction.up);
+        return KeyEventResult.handled;
+      } else if (keysPressed.contains(LogicalKeyboardKey.arrowDown) ||
+          keysPressed.contains(LogicalKeyboardKey.keyS)) {
+        directionQueue.add(Direction.down);
+        return KeyEventResult.handled;
+      } else if (keysPressed.contains(LogicalKeyboardKey.arrowLeft) ||
+          keysPressed.contains(LogicalKeyboardKey.keyA)) {
+        directionQueue.add(Direction.left);
+        return KeyEventResult.handled;
+      } else if (keysPressed.contains(LogicalKeyboardKey.arrowRight) ||
+          keysPressed.contains(LogicalKeyboardKey.keyD)) {
+        directionQueue.add(Direction.right);
+        return KeyEventResult.handled;
+      }
+    }
+    return KeyEventResult.ignored;
+  }
 }
 
-class MessmathWorld extends World {}
+class MessmathWorld extends World {
+  @override
+  void onLoad() {
+    super.onLoad();
+    add(
+      BoardComponent(
+        Engine(
+          Board.fromAsciiString('''
+          #############
+          #...........#
+          #.12......[3].#
+          #.....P.....#
+          #.....=.....#
+          #...........#
+          #############
+          '''),
+        ),
+      ),
+    );
+  }
+}
