@@ -1,6 +1,7 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:messmath/main.dart';
+import 'package:messmath/src/features/themes/game_fonts.dart';
 import 'package:messmath/src/features/themes/palette.dart';
 
 class WinOverlayComponent extends Component {
@@ -22,7 +23,7 @@ class WinOverlayComponent extends Component {
     final messagePainter = TextPainter(
       text: TextSpan(
         text: 'Equation Solved!',
-        style: TextStyle(
+        style: GameFonts.style(
           color: Palette.color20.color,
           fontSize: 48,
           fontWeight: FontWeight.bold,
@@ -39,7 +40,7 @@ class WinOverlayComponent extends Component {
     final moveCountPainter = TextPainter(
       text: TextSpan(
         text: 'Moves: $moveCount',
-        style: TextStyle(
+        style: GameFonts.style(
           color: Palette.color20.color,
           fontSize: 32,
           fontWeight: FontWeight.w400,
@@ -59,7 +60,7 @@ class WinOverlayComponent extends Component {
     final retryPainter = TextPainter(
       text: TextSpan(
         text: 'Press [R] to Retry',
-        style: TextStyle(
+        style: GameFonts.style(
           color: Palette.color20.color,
           fontSize: 24,
           fontWeight: FontWeight.w400,
@@ -82,7 +83,7 @@ class WinOverlayComponent extends Component {
     final nextLevelPainter = TextPainter(
       text: TextSpan(
         text: 'Press [Enter] for Next Level',
-        style: TextStyle(
+        style: GameFonts.style(
           color: Palette.color20.color,
           fontSize: 24,
           fontWeight: FontWeight.w400,

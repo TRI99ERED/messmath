@@ -1,6 +1,7 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:messmath/main.dart';
+import 'package:messmath/src/features/themes/game_fonts.dart';
 import 'package:messmath/src/features/themes/palette.dart';
 
 class HudComponent extends Component {
@@ -29,7 +30,7 @@ class HudComponent extends Component {
     final textPainter = TextPainter(
       text: TextSpan(
         text: levelName,
-        style: TextStyle(
+        style: GameFonts.style(
           color: Palette.color27.color,
           fontSize: 32,
           fontWeight: FontWeight.w400,
@@ -65,7 +66,7 @@ class HudComponent extends Component {
     final moveCountTextPainter = TextPainter(
       text: TextSpan(
         text: 'Moves: ${(parent as MessmathWorld).boardComponent.moveCount}',
-        style: TextStyle(
+        style: GameFonts.style(
           color: Palette.color27.color,
           fontSize: 32,
           fontWeight: FontWeight.w400,
@@ -101,7 +102,7 @@ class HudComponent extends Component {
     final moveHintTextPainter = TextPainter(
       text: TextSpan(
         text: '←↑↓→ or WASD to move. R to reset.',
-        style: TextStyle(
+        style: GameFonts.style(
           color: Palette.color27.color,
           fontSize: 24,
           fontWeight: FontWeight.w400,

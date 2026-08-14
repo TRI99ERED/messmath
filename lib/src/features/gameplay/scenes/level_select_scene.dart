@@ -7,6 +7,7 @@ import 'package:messmath/src/core/game/board.dart';
 import 'package:messmath/src/core/game/cell_type.dart';
 import 'package:messmath/src/core/game/direction.dart';
 import 'package:messmath/src/core/levels/level_loader.dart';
+import 'package:messmath/src/features/themes/game_fonts.dart';
 import 'package:messmath/src/features/themes/palette.dart';
 
 class LevelSelectScene extends Component {
@@ -157,7 +158,7 @@ class LevelSelectScene extends Component {
         final textPainter = TextPainter(
           text: TextSpan(
             text: cell.type.toDisplayString(),
-            style: TextStyle(
+            style: GameFonts.style(
               color: cell.type.toColor(),
               fontSize: _boardFontSize,
               fontWeight: FontWeight.w900,
@@ -189,7 +190,7 @@ class LevelSelectScene extends Component {
 
   void _drawHint(Canvas canvas) {
     final hintRRect = RRect.fromRectAndCorners(
-      Rect.fromLTWH(-256, MessmathGame.kGameHeight / 2 - 16 - 64, 512, 64),
+      Rect.fromLTWH(-512, MessmathGame.kGameHeight / 2 - 16 - 64, 1024, 64),
       topLeft: const Radius.circular(8),
       topRight: const Radius.circular(8),
       bottomLeft: const Radius.circular(8),
@@ -199,8 +200,8 @@ class LevelSelectScene extends Component {
 
     final hintTextPainter = TextPainter(
       text: TextSpan(
-        text: '←↑↓→ or WASD to navigate. [Enter] to select.',
-        style: TextStyle(
+        text: '←↑↓→ or WASD to navigate. [Enter] to select level.',
+        style: GameFonts.style(
           color: Palette.color27.color,
           fontSize: 24,
           fontWeight: FontWeight.w400,
@@ -212,7 +213,7 @@ class LevelSelectScene extends Component {
     hintTextPainter.paint(
       canvas,
       Offset(
-        -256 + (512 - hintTextPainter.width) / 2,
+        -512 + (1024 - hintTextPainter.width) / 2,
         MessmathGame.kGameHeight / 2 -
             16 -
             64 +

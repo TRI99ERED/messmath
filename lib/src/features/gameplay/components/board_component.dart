@@ -7,6 +7,7 @@ import 'package:messmath/src/core/game/board.dart';
 import 'package:messmath/src/core/game/cell_type.dart';
 import 'package:messmath/src/core/game/direction.dart';
 import 'package:messmath/src/core/game/engine.dart';
+import 'package:messmath/src/features/themes/game_fonts.dart';
 import 'package:messmath/src/features/themes/palette.dart';
 
 class BoardComponent extends Component with HasGameReference<MessmathGame> {
@@ -23,6 +24,7 @@ class BoardComponent extends Component with HasGameReference<MessmathGame> {
   BoardComponent(Engine engine) : _engine = engine;
 
   int get moveCount => _engine.moveCount;
+  bool get isWon => _engine.won;
   VoidCallback? get onWin => _engine.onWin;
   set onWin(VoidCallback? callback) {
     _engine.onWin = callback;
@@ -154,7 +156,7 @@ class BoardComponent extends Component with HasGameReference<MessmathGame> {
     final textPainter = TextPainter(
       text: TextSpan(
         text: type.toDisplayString(),
-        style: TextStyle(
+        style: GameFonts.style(
           color: type.toColor(),
           fontSize: fontSize,
           fontWeight: FontWeight.w900,

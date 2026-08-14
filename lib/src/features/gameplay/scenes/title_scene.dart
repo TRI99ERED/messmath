@@ -4,6 +4,7 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:messmath/main.dart';
 import 'package:messmath/src/core/game/cell_type.dart';
+import 'package:messmath/src/features/themes/game_fonts.dart';
 import 'package:messmath/src/features/themes/palette.dart';
 
 class TitleScene extends Component {
@@ -34,7 +35,7 @@ class TitleScene extends Component {
     final textPainter = TextPainter(
       text: TextSpan(
         text: 'M',
-        style: TextStyle(
+        style: GameFonts.style(
           color: Palette.color20.color,
           fontSize: _fontSize,
           fontWeight: FontWeight.w900,
@@ -62,10 +63,10 @@ class TitleScene extends Component {
     final creditPainter = TextPainter(
       text: TextSpan(
         text: 'by TRI99ER',
-        style: TextStyle(
-          color: Palette.color20.color,
+        style: GameFonts.style(
+          color: Palette.color22.color,
           fontSize: 32,
-          fontWeight: FontWeight.w900,
+          fontWeight: FontWeight.w400,
         ),
       ),
       textDirection: TextDirection.ltr,
@@ -88,7 +89,7 @@ class TitleScene extends Component {
     final hintPainter = TextPainter(
       text: TextSpan(
         text: 'Press [Enter] to select level',
-        style: TextStyle(
+        style: GameFonts.style(
           color: Palette.color20.color,
           fontSize: 24,
           fontWeight: FontWeight.w400,

@@ -12,6 +12,7 @@ import 'package:messmath/src/features/gameplay/components/game_complete_overlay_
 import 'package:messmath/src/features/gameplay/components/win_overlay_component.dart';
 import 'package:messmath/src/features/gameplay/scenes/level_select_scene.dart';
 import 'package:messmath/src/features/gameplay/scenes/title_scene.dart';
+import 'package:messmath/src/features/themes/game_fonts.dart';
 import 'package:messmath/src/features/themes/palette.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -24,6 +25,8 @@ void main() {
   runZonedGuarded(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
+      GameFonts.disableRuntimeFetching();
+      GameFonts.preload();
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
       SystemChrome.setPreferredOrientations([
         DeviceOrientation.landscapeLeft,
@@ -196,6 +199,7 @@ class MessmathWorld extends World {
   }
 
   void nextLevel() {
+    if (!boardComponent.isWon) return;
     if (currentLevel < LevelLoader.levels.length) {
       loadLevel(currentLevel + 1);
     } else {
