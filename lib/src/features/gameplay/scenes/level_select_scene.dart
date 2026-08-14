@@ -19,6 +19,7 @@ class LevelSelectScene extends Component {
   static const double _selectorPadding = 12.0;
   static const double _selectorRadius = 16.0;
   static const double _previewPadding = 10.0;
+  static const double _labelSpace = 28.0;
   static const double _gridCenterY = -50.0;
 
   static const double _boardCellSize = 64.0;
@@ -27,6 +28,7 @@ class LevelSelectScene extends Component {
   static const double _boardFineOffset = -2.0;
 
   int _selectedIndex = 0;
+  final Set<int> _unlockedLevels = {};
   Vector2 _selectorCenter = Vector2.zero();
   Vector2 _selectorTarget = Vector2.zero();
   bool _selectorInitialized = false;
@@ -44,6 +46,18 @@ class LevelSelectScene extends Component {
         _slotHeight / 2 +
         row * (_slotHeight + _gap);
     return Vector2(x, y);
+  }
+
+  @override
+  Future<void> onLoad() async {
+    final progress = (parent as MessmathWorld).levelProgress;
+    await progress.load();
+    _unlockedLevels.clear();
+    for (var i = 1; i <= LevelLoader.levels.length; i++) {
+      if (i == 1 || progress.isCompleted(i - 1)) {
+        _unlockedLevels.add(i);
+      }
+    }
   }
 
   void _ensureSelectorInitialized() {
@@ -64,8 +78,20 @@ class LevelSelectScene extends Component {
   void navigate(Direction direction) {
     final total = LevelLoader.levels.length;
     if (total == 0) return;
-    final col = _selectedIndex % _columns;
-    final row = _selectedIndex ~/ _columns;
+    var index = _selectedIndex;
+    for (var i = 0; i < total; i++) {
+      index = _neighborIndex(index, direction, total);
+      if (_unlockedLevels.contains(index + 1)) {
+        _selectedIndex = index;
+        _selectorTarget = _slotCenter(index);
+        return;
+      }
+    }
+  }
+
+  int _neighborIndex(int index, Direction direction, int total) {
+    final col = index % _columns;
+    final row = index ~/ _columns;
     var newRow = row;
     var newCol = col;
     switch (direction) {
@@ -86,11 +112,11 @@ class LevelSelectScene extends Component {
     if (newIndex >= total) {
       newIndex = 0;
     }
-    _selectedIndex = newIndex;
-    _selectorTarget = _slotCenter(newIndex);
+    return newIndex;
   }
 
   void selectLevel() {
+    if (!_unlockedLevels.contains(_selectedIndex + 1)) return;
     (parent as MessmathWorld).loadLevel(_selectedIndex + 1);
   }
 
@@ -119,22 +145,39 @@ class LevelSelectScene extends Component {
       Palette.color22.paint(),
     );
 
+    final progress = (parent as MessmathWorld).levelProgress;
     for (var i = 0; i < LevelLoader.levels.length; i++) {
-      _drawPreview(canvas, LevelLoader.levels[i].initialBoard, _slotCenter(i));
+      final levelNumber = i + 1;
+      final slotCenter = _slotCenter(i);
+      _drawPreview(
+        canvas,
+        LevelLoader.levels[i].initialBoard,
+        slotCenter,
+        isUnlocked: _unlockedLevels.contains(levelNumber),
+      );
+      final bestMoves = progress.bestMoves(levelNumber);
+      if (bestMoves != null) {
+        _drawBestMoves(canvas, bestMoves, slotCenter);
+      }
     }
 
     _drawHint(canvas);
   }
 
-  void _drawPreview(Canvas canvas, Board board, Vector2 slotCenter) {
+  void _drawPreview(
+    Canvas canvas,
+    Board board,
+    Vector2 slotCenter, {
+    required bool isUnlocked,
+  }) {
     final boardWidth = board.width * _boardCellSize;
     final boardHeight = board.height * _boardCellSize;
     final maxWidth = _slotWidth - _previewPadding * 2;
-    final maxHeight = _slotHeight - _previewPadding * 2;
+    final maxHeight = _slotHeight - _previewPadding * 2 - _labelSpace;
     final scale = math.min(maxWidth / boardWidth, maxHeight / boardHeight);
 
     canvas.save();
-    canvas.translate(slotCenter.x, slotCenter.y);
+    canvas.translate(slotCenter.x, slotCenter.y - _labelSpace / 2);
     canvas.scale(scale, scale);
     canvas.translate(-boardWidth / 2, -boardHeight / 2);
 
@@ -147,7 +190,9 @@ class LevelSelectScene extends Component {
           _boardCellSize - 2 * _boardSpacing,
         );
         final paint = Paint()
-          ..color = cell.isWall ? Palette.color25.color : Palette.color20.color;
+          ..color = cell.isWall
+              ? Palette.color25.color
+              : (isUnlocked ? Palette.color20.color : Palette.color24.color);
         canvas.drawRect(rect, paint);
       }
     }
@@ -186,6 +231,31 @@ class LevelSelectScene extends Component {
     }
 
     canvas.restore();
+  }
+
+  void _drawBestMoves(Canvas canvas, int bestMoves, Vector2 slotCenter) {
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: 'Best: $bestMoves',
+        style: GameFonts.style(
+          color: Palette.color12.color,
+          fontSize: 20,
+          fontWeight: FontWeight.w400,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout();
+    textPainter.paint(
+      canvas,
+      Offset(
+        slotCenter.x - textPainter.width / 2,
+        slotCenter.y +
+            _slotHeight / 2 -
+            _labelSpace +
+            (_labelSpace - textPainter.height) / 2,
+      ),
+    );
   }
 
   void _drawHint(Canvas canvas) {

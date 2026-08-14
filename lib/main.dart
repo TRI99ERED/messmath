@@ -7,6 +7,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:messmath/src/core/game/engine.dart';
+import 'package:messmath/src/features/data/repositories/level_progress_repository.dart';
+import 'package:messmath/src/features/data/repositories/shared_preferences/shared_preferences_repository_impl.dart';
 import 'package:messmath/src/features/gameplay/components/board_component.dart';
 import 'package:messmath/src/features/gameplay/components/game_complete_overlay_component.dart';
 import 'package:messmath/src/features/gameplay/components/win_overlay_component.dart';
@@ -154,6 +156,10 @@ class MessmathGame extends FlameGame with KeyboardEvents {
 class MessmathWorld extends World {
   int currentLevel = 1;
 
+  final LevelProgressRepository levelProgress = LevelProgressRepository(
+    SharedPreferencesRepositoryImpl(),
+  );
+
   late BoardComponent boardComponent;
   late HudComponent hudComponent;
 
@@ -192,6 +198,7 @@ class MessmathWorld extends World {
     add(hudComponent);
 
     boardComponent.onWin = () {
+      levelProgress.saveResult(currentLevel, boardComponent.moveCount);
       add(WinOverlayComponent(moveCount: boardComponent.moveCount));
     };
   }
