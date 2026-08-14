@@ -16,7 +16,7 @@ import 'package:window_manager/window_manager.dart';
 import 'src/core/game/direction.dart';
 import 'src/core/levels/level_loader.dart';
 import 'src/core/utils/logger.dart';
-import 'src/features/gameplay/components/hud_component.dart';
+import 'src/features/gameplay/hud/hud_component.dart';
 
 void main() {
   runZonedGuarded(
