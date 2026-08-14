@@ -6,14 +6,15 @@ import 'package:flame/game.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:messmath/src/core/game/board.dart';
 import 'package:messmath/src/core/game/engine.dart';
 import 'package:messmath/src/features/gameplay/components/board_component.dart';
 import 'package:messmath/src/features/themes/palette.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'src/core/game/direction.dart';
+import 'src/core/levels/level_loader.dart';
 import 'src/core/utils/logger.dart';
+import 'src/features/gameplay/components/hud_component.dart';
 
 void main() {
   runZonedGuarded(
@@ -108,25 +109,20 @@ class MessmathGame extends FlameGame with KeyboardEvents {
 
 class MessmathWorld extends World {
   late BoardComponent boardComponent;
+  late HudComponent hudComponent;
 
   @override
   void onLoad() {
     super.onLoad();
 
-    boardComponent = BoardComponent(
-      Engine(
-        Board.fromAsciiString('''
-          #############
-          #...........#
-          #.12......[3].#
-          #.....P.....#
-          #.....=.....#
-          #...........#
-          #############
-          '''),
-      ),
-    );
+    final level = LevelLoader.loadLevel(1);
+
+    boardComponent = BoardComponent(Engine(level.initialBoard));
 
     add(boardComponent);
+
+    hudComponent = HudComponent(levelName: level.name);
+
+    add(hudComponent);
   }
 }

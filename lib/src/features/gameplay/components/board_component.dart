@@ -13,14 +13,16 @@ class BoardComponent extends Component with HasGameReference<MessmathGame> {
   final Engine _engine;
 
   static const double cellSize = 64.0;
-  static const double spacing = 4.0;
+  static const double spacing = 1.0;
   static const double moveDuration = 0.12;
   static const double fontSize = 32.0;
-  static const double fineOffset = -4.0;
+  static const double fineOffset = -2.0;
 
   final List<_TileAnimation> _animations = [];
 
   BoardComponent(Engine engine) : _engine = engine;
+
+  int get moveCount => _engine.moveCount;
 
   @override
   void update(double dt) {
@@ -80,17 +82,33 @@ class BoardComponent extends Component with HasGameReference<MessmathGame> {
   @override
   void render(Canvas canvas) {
     final board = _engine.board;
+    final originX = -board.width * cellSize / 2;
+    final originY = -board.height * cellSize / 2;
     for (final row in board.cells) {
       for (final cell in row) {
-        _drawCellBackground(canvas, cell);
+        _drawCellBackground(canvas, cell, originX, originY);
         if (cell.type == CellType.empty) continue;
         if (_isAnimationTarget(cell)) continue;
-        _drawContent(canvas, cell.type, cell.x.toDouble(), cell.y.toDouble());
+        _drawContent(
+          canvas,
+          cell.type,
+          cell.x.toDouble(),
+          cell.y.toDouble(),
+          originX,
+          originY,
+        );
       }
     }
     for (final animation in _animations) {
       final position = animation.position;
-      _drawContent(canvas, animation.type, position.x, position.y);
+      _drawContent(
+        canvas,
+        animation.type,
+        position.x,
+        position.y,
+        originX,
+        originY,
+      );
     }
   }
 
@@ -104,32 +122,38 @@ class BoardComponent extends Component with HasGameReference<MessmathGame> {
     return false;
   }
 
-  void _drawCellBackground(Canvas canvas, Cell cell) {
-    final rect = RRect.fromRectAndCorners(
-      Rect.fromLTWH(
-        cell.x * cellSize + spacing - MessmathGame.kGameWidth / 2,
-        cell.y * cellSize + spacing - MessmathGame.kGameHeight / 2,
-        cellSize - 2 * spacing,
-        cellSize - 2 * spacing,
-      ),
-      topLeft: Radius.circular(8),
-      topRight: Radius.circular(8),
-      bottomLeft: Radius.circular(8),
-      bottomRight: Radius.circular(8),
+  void _drawCellBackground(
+    Canvas canvas,
+    Cell cell,
+    double originX,
+    double originY,
+  ) {
+    final rect = Rect.fromLTWH(
+      cell.x * cellSize + spacing + originX,
+      cell.y * cellSize + spacing + originY,
+      cellSize - 2 * spacing,
+      cellSize - 2 * spacing,
     );
     final paint = Paint()
       ..color = cell.isWall ? Palette.color25.color : Palette.color20.color;
-    canvas.drawRRect(rect, paint);
+    canvas.drawRect(rect, paint);
   }
 
-  void _drawContent(Canvas canvas, CellType type, double col, double row) {
+  void _drawContent(
+    Canvas canvas,
+    CellType type,
+    double col,
+    double row,
+    double originX,
+    double originY,
+  ) {
     final textPainter = TextPainter(
       text: TextSpan(
         text: type.toDisplayString(),
         style: TextStyle(
           color: type.toColor(),
           fontSize: fontSize,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w900,
         ),
       ),
       textDirection: TextDirection.ltr,
@@ -139,14 +163,14 @@ class BoardComponent extends Component with HasGameReference<MessmathGame> {
       canvas,
       Offset(
         col * cellSize +
-            spacing -
-            MessmathGame.kGameWidth / 2 +
+            spacing +
+            originX +
             cellSize / 2 -
             textPainter.width / 2 +
             fineOffset,
         row * cellSize +
-            spacing -
-            MessmathGame.kGameHeight / 2 +
+            spacing +
+            originY +
             cellSize / 2 -
             textPainter.height / 2 +
             fineOffset,
