@@ -39,6 +39,7 @@ dependencies:
   screen_retriever: ^0.2.2
   google_fonts: ^8.2.1
   shared_preferences: ^2.5.5
+  flame_audio: ^2.12.2
 
 dev_dependencies:
   flutter_test:
@@ -64,6 +65,7 @@ flutter:
 
   assets:
     - assets/fonts/
+    - assets/sfx/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

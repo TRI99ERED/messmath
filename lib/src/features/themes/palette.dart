@@ -35,4 +35,16 @@ class Palette {
   static const PaletteEntry color30 = PaletteEntry(Color(0xFFF6757A));
   static const PaletteEntry color31 = PaletteEntry(Color(0xFFE8B796));
   static const PaletteEntry color32 = PaletteEntry(Color(0xFFC28569));
+
+  static const List<PaletteEntry> levelBackgrounds = [
+    color8,
+    color9,
+    color10,
+    color11,
+    color12,
+    color13,
+    color14,
+    color15,
+    color16,
+  ];
 }

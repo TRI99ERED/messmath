@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:messmath/main.dart';
+import 'package:messmath/src/core/audio/sound_effects.dart';
 import 'package:messmath/src/core/game/board.dart';
 import 'package:messmath/src/core/game/cell_type.dart';
 import 'package:messmath/src/core/game/direction.dart';
@@ -82,6 +83,9 @@ class LevelSelectScene extends Component {
     for (var i = 0; i < total; i++) {
       index = _neighborIndex(index, direction, total);
       if (_unlockedLevels.contains(index + 1)) {
+        if (index != _selectedIndex) {
+          SoundEffects.instance.playMove();
+        }
         _selectedIndex = index;
         _selectorTarget = _slotCenter(index);
         return;
@@ -117,6 +121,7 @@ class LevelSelectScene extends Component {
 
   void selectLevel() {
     if (!_unlockedLevels.contains(_selectedIndex + 1)) return;
+    SoundEffects.instance.playNavigate();
     (parent as MessmathWorld).loadLevel(_selectedIndex + 1);
   }
 

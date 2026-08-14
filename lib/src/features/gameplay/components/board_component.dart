@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:messmath/main.dart';
+import 'package:messmath/src/core/audio/sound_effects.dart';
 import 'package:messmath/src/core/game/board.dart';
 import 'package:messmath/src/core/game/cell_type.dart';
 import 'package:messmath/src/core/game/direction.dart';
@@ -47,6 +48,11 @@ class BoardComponent extends Component with HasGameReference<MessmathGame> {
     final result = _engine.move(direction);
     if (result == MoveResult.blocked) return;
     _animations.addAll(_diff(before, _engine.board));
+    if (result == MoveResult.moved) {
+      SoundEffects.instance.playMove();
+    } else {
+      SoundEffects.instance.playPush();
+    }
   }
 
   List<_TileAnimation> _diff(Board before, Board after) {

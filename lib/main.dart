@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
@@ -7,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:messmath/src/core/game/engine.dart';
+import 'package:messmath/src/core/audio/sound_effects.dart';
 import 'package:messmath/src/features/data/repositories/level_progress_repository.dart';
 import 'package:messmath/src/features/data/repositories/shared_preferences/shared_preferences_repository_impl.dart';
 import 'package:messmath/src/features/gameplay/components/board_component.dart';
@@ -29,6 +31,7 @@ void main() {
       WidgetsFlutterBinding.ensureInitialized();
       GameFonts.disableRuntimeFetching();
       GameFonts.preload();
+      unawaited(SoundEffects.instance.init());
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
       SystemChrome.setPreferredOrientations([
         DeviceOrientation.landscapeLeft,
@@ -67,8 +70,11 @@ class MessmathGame extends FlameGame with KeyboardEvents {
 
   final List<Direction> directionQueue = [];
 
+  late final RectangleComponent _backdrop;
+
   @override
-  Color backgroundColor() => Palette.color27.color;
+  Color backgroundColor() =>
+      (world as MessmathWorld).levelBackgroundColor;
 
   MessmathGame()
     : super(
@@ -81,7 +87,13 @@ class MessmathGame extends FlameGame with KeyboardEvents {
           ),
         ),
         world: MessmathWorld(),
-      );
+      ) {
+    _backdrop = camera.backdrop as RectangleComponent;
+  }
+
+  void updateLevelBackground(Color color) {
+    _backdrop.paint.color = color;
+  }
 
   @override
   KeyEventResult onKeyEvent(
@@ -112,6 +124,9 @@ class MessmathGame extends FlameGame with KeyboardEvents {
           return KeyEventResult.handled;
         } else if (keysPressed.contains(LogicalKeyboardKey.enter)) {
           levelSelectScene.selectLevel();
+          return KeyEventResult.handled;
+        } else if (keysPressed.contains(LogicalKeyboardKey.escape)) {
+          world.showTitle();
           return KeyEventResult.handled;
         }
         return KeyEventResult.ignored;
@@ -156,6 +171,8 @@ class MessmathGame extends FlameGame with KeyboardEvents {
 class MessmathWorld extends World {
   int currentLevel = 1;
 
+  Color levelBackgroundColor = Palette.color27.color;
+
   final LevelProgressRepository levelProgress = LevelProgressRepository(
     SharedPreferencesRepositoryImpl(),
   );
@@ -181,13 +198,25 @@ class MessmathWorld extends World {
   }
 
   void showLevelSelect() {
+    SoundEffects.instance.playNavigate();
     removeAll(children);
     add(LevelSelectScene());
+  }
+
+  void showTitle() {
+    SoundEffects.instance.playNavigate();
+    removeAll(children);
+    add(TitleScene());
   }
 
   void loadLevel(int levelNumber) {
     currentLevel = levelNumber;
     final level = LevelLoader.loadLevel(levelNumber);
+
+    levelBackgroundColor =
+        Palette.levelBackgrounds[Random().nextInt(Palette.levelBackgrounds.length)]
+            .color;
+    (parent as MessmathGame).updateLevelBackground(levelBackgroundColor);
 
     boardComponent = BoardComponent(Engine(level.initialBoard));
     boardComponent.reset();
@@ -198,6 +227,7 @@ class MessmathWorld extends World {
     add(hudComponent);
 
     boardComponent.onWin = () {
+      SoundEffects.instance.playWin();
       levelProgress.saveResult(currentLevel, boardComponent.moveCount);
       add(WinOverlayComponent(moveCount: boardComponent.moveCount));
     };
@@ -209,6 +239,7 @@ class MessmathWorld extends World {
 
   void nextLevel() {
     if (!boardComponent.isWon) return;
+    SoundEffects.instance.playNavigate();
     if (currentLevel < LevelLoader.levels.length) {
       loadLevel(currentLevel + 1);
     } else {
