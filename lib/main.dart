@@ -101,7 +101,7 @@ class MessmathGame extends FlameGame with KeyboardEvents {
         directionQueue.add(Direction.right);
         return KeyEventResult.handled;
       } else if (keysPressed.contains(LogicalKeyboardKey.keyR)) {
-        (world as MessmathWorld).boardComponent.reset();
+        (world as MessmathWorld).resetLevel();
         return KeyEventResult.handled;
       } else if (keysPressed.contains(LogicalKeyboardKey.enter)) {
         (world as MessmathWorld).nextLevel();
@@ -130,6 +130,7 @@ class MessmathWorld extends World {
     final level = LevelLoader.loadLevel(levelNumber);
 
     boardComponent = BoardComponent(Engine(level.initialBoard));
+    boardComponent.reset();
     hudComponent = HudComponent(levelName: level.name);
 
     removeAll(children);
@@ -139,6 +140,10 @@ class MessmathWorld extends World {
     boardComponent.onWin = () {
       add(WinOverlayComponent(moveCount: boardComponent.moveCount));
     };
+  }
+
+  void resetLevel() {
+    loadLevel(currentLevel);
   }
 
   void nextLevel() {

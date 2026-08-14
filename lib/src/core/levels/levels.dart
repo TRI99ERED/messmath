@@ -8,12 +8,12 @@ class Level {
 }
 
 final level1 = Level(
-  name: 'First Step',
+  name: 'First Steps',
   initialBoard: Board.fromAsciiString('''
     #######
     #[1+].[=3]#
     ###2###
-    ...P...
     .......
+    ...P...
     '''),
 );
