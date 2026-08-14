@@ -89,7 +89,7 @@ class HudComponent extends Component {
     );
 
     final moveHintPanelRRect = RRect.fromRectAndCorners(
-      Rect.fromLTWH(-256, MessmathGame.kGameHeight / 2 - 16 - 64, 512, 64),
+      Rect.fromLTWH(-512, MessmathGame.kGameHeight / 2 - 16 - 64, 1024, 64),
       topLeft: const Radius.circular(8),
       topRight: const Radius.circular(8),
       bottomLeft: const Radius.circular(8),
@@ -101,7 +101,7 @@ class HudComponent extends Component {
 
     final moveHintTextPainter = TextPainter(
       text: TextSpan(
-        text: '←↑↓→ or WASD to move. R to reset.',
+        text: '←↑↓→ or WASD to move. [R] to reset. [Esc] to exit',
         style: GameFonts.style(
           color: Palette.color27.color,
           fontSize: 24,
@@ -114,7 +114,7 @@ class HudComponent extends Component {
     moveHintTextPainter.paint(
       canvas,
       Offset(
-        -256 + (512 - moveHintTextPainter.width) / 2,
+        -512 + (1024 - moveHintTextPainter.width) / 2,
         MessmathGame.kGameHeight / 2 -
             16 -
             64 +

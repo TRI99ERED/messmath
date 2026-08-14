@@ -143,6 +143,8 @@ class MessmathGame extends FlameGame with KeyboardEvents {
       } else if (keysPressed.contains(LogicalKeyboardKey.enter)) {
         world.nextLevel();
         return KeyEventResult.handled;
+      } else if (keysPressed.contains(LogicalKeyboardKey.escape)) {
+        world.showLevelSelect();
       }
     }
     return KeyEventResult.ignored;
