@@ -32,6 +32,7 @@ void main() {
       GameFonts.disableRuntimeFetching();
       GameFonts.preload();
       unawaited(SoundEffects.instance.init());
+      SoundEffects.instance.playMainTheme();
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
       SystemChrome.setPreferredOrientations([
         DeviceOrientation.landscapeLeft,

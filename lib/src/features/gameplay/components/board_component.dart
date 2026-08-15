@@ -72,10 +72,9 @@ class BoardComponent extends Component with HasGameReference<MessmathGame> {
       if (type == CellType.empty) continue;
       final from = _positionsOf(before, type);
       final to = _positionsOf(after, type);
-      final count = math.min(from.length, to.length);
-      for (var i = 0; i < count; i++) {
-        final a = from[i];
-        final b = to[i];
+      for (final (fromIndex, toIndex) in _minCostAssignment(from, to)) {
+        final a = from[fromIndex];
+        final b = to[toIndex];
         if (a != b) {
           moves.add(
             _TileAnimation(
@@ -88,6 +87,92 @@ class BoardComponent extends Component with HasGameReference<MessmathGame> {
       }
     }
     return moves;
+  }
+
+  /// Pairs each element of [from] with an element of [to] such that the total
+  /// squared distance moved is minimized. Elements that stay put pair with
+  /// themselves, so only the truly pushed tokens produce an animation.
+  List<(int, int)> _minCostAssignment(
+    List<(int, int)> from,
+    List<(int, int)> to,
+  ) {
+    final n = from.length;
+    final m = to.length;
+    if (n == 0 || m == 0) return [];
+    if (n > m) {
+      final reversed = _minCostAssignment(to, from);
+      return [for (final (t, f) in reversed) (f, t)];
+    }
+
+    final cost = List.generate(n, (i) {
+      final fx = from[i].$1.toDouble();
+      final fy = from[i].$2.toDouble();
+      return List.generate(m, (j) {
+        final dx = fx - to[j].$1.toDouble();
+        final dy = fy - to[j].$2.toDouble();
+        return dx * dx + dy * dy;
+      });
+    });
+
+    final rowToCol = _hungarian(cost);
+    return [for (var i = 0; i < n; i++) (i, rowToCol[i])];
+  }
+
+  List<int> _hungarian(List<List<double>> cost) {
+    final n = cost.length;
+    final m = cost[0].length;
+    final u = List<double>.filled(n + 1, 0);
+    final v = List<double>.filled(m + 1, 0);
+    final p = List<int>.filled(m + 1, 0);
+    final way = List<int>.filled(m + 1, 0);
+
+    for (var i = 1; i <= n; i++) {
+      p[0] = i;
+      var j0 = 0;
+      final minv = List<double>.filled(m + 1, double.infinity);
+      final used = List<bool>.filled(m + 1, false);
+      do {
+        used[j0] = true;
+        final i0 = p[j0];
+        var delta = double.infinity;
+        var j1 = 0;
+        for (var j = 1; j <= m; j++) {
+          if (used[j]) continue;
+          final cur = cost[i0 - 1][j - 1] - u[i0] - v[j];
+          if (cur < minv[j]) {
+            minv[j] = cur;
+            way[j] = j0;
+          }
+          if (minv[j] < delta) {
+            delta = minv[j];
+            j1 = j;
+          }
+        }
+        for (var j = 0; j <= m; j++) {
+          if (used[j]) {
+            u[p[j]] += delta;
+            v[j] -= delta;
+          } else {
+            minv[j] -= delta;
+          }
+        }
+        j0 = j1;
+      } while (p[j0] != 0);
+
+      do {
+        final j1 = way[j0];
+        p[j0] = p[j1];
+        j0 = j1;
+      } while (j0 != 0);
+    }
+
+    final result = List<int>.filled(n, -1);
+    for (var j = 1; j <= m; j++) {
+      if (p[j] != 0) {
+        result[p[j] - 1] = j - 1;
+      }
+    }
+    return result;
   }
 
   List<(int, int)> _positionsOf(Board board, CellType type) {
