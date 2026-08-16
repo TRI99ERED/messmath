@@ -89,9 +89,6 @@ class BoardComponent extends Component with HasGameReference<MessmathGame> {
     return moves;
   }
 
-  /// Pairs each element of [from] with an element of [to] such that the total
-  /// squared distance moved is minimized. Elements that stay put pair with
-  /// themselves, so only the truly pushed tokens produce an animation.
   List<(int, int)> _minCostAssignment(
     List<(int, int)> from,
     List<(int, int)> to,
